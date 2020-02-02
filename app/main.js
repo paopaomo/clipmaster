@@ -1,4 +1,4 @@
-const { app, Menu, Tray, nativeTheme, clipboard, globalShortcut } = require('electron');
+const { app, Menu, Tray, nativeTheme, clipboard, globalShortcut, Notification } = require('electron');
 const path = require('path');
 
 let tray = null;
@@ -16,12 +16,20 @@ const getIcon = () => {
 
 const addClipping = () => {
   const clipping = clipboard.readText();
-  if(clippings.includes(clipping)) {
+  if(clippings.includes(clipping) || !clipping.trim()) {
       return;
   }
   clippings.unshift(clipping);
   updateMenu();
   return clipping;
+};
+
+const showClippingNotification = (body) => {
+    const notification = new Notification({
+        title: 'Clipping Added',
+        body
+    });
+    notification.show();
 };
 
 const createClippingMenuItem = (clipping, index) => ({
@@ -38,7 +46,8 @@ const updateMenu = () => {
             label: 'Clip New Clipping',
             accelerator: 'Shift+CommandOrControl+C',
             click() {
-                addClipping();
+                const clipping = addClipping();
+                showClippingNotification(clipping);
             }
         },
         {
@@ -67,6 +76,8 @@ app.on('ready', () => {
 
     tray = new Tray(path.join(__dirname, 'images', getIcon()));
 
+    tray.setPressedImage(path.join(__dirname, 'images/icon-light.png'));
+
     if(process.platform === 'win32') {
         tray.on('click', tray.popUpContextMenu);
     }
@@ -82,7 +93,10 @@ app.on('ready', () => {
 
     const newClippingShortcut = globalShortcut.register(
         'Shift+Option+CommandOrControl+C',
-        addClipping
+        () => {
+            const clipping = addClipping();
+            showClippingNotification(clipping);
+        }
     );
 
     if(!newClippingShortcut) {
