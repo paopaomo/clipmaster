@@ -1,7 +1,8 @@
-const { app, Menu, Tray, nativeTheme } = require('electron');
+const { app, Menu, Tray, nativeTheme, clipboard } = require('electron');
 const path = require('path');
 
 let tray = null;
+const clippings = [];
 
 const getIcon = () => {
     if(process.platform === 'win32') {
@@ -13,16 +14,40 @@ const getIcon = () => {
     return 'icon-dark.png';
 };
 
-app.on('ready', () => {
-    if(app.dock) {
-        app.dock.hide();
+const addClipping = () => {
+  const clipping = clipboard.readText();
+  clippings.push(clipping);
+  updateMenu();
+  return clipping;
+};
+
+const createClippingMenuItem = (clipping, index) => ({
+    label: clipping,
+    accelerator: `CommandOrControl+${index}`,
+    click() {
+        clipboard.writeText(clipping);
     }
+});
 
-    tray = new Tray(path.join(__dirname, 'images', getIcon()));
-
+const updateMenu = () => {
     const menu = Menu.buildFromTemplate([
         {
+            label: 'Clip New Clipping',
+            accelerator: 'Shift+CommandOrControl+C',
+            click() {
+                addClipping();
+            }
+        },
+        {
+            type: 'separator'
+        },
+        ...clippings.map(createClippingMenuItem),
+        {
+            type: 'separator'
+        },
+        {
             label: 'Quit',
+            accelerator: 'CommandOrControl+Q',
             click() {
                 app.quit();
             }
@@ -33,6 +58,16 @@ app.on('ready', () => {
         tray.on('click', tray.popUpContextMenu);
     }
 
-    tray.setToolTip('Clipmaster');
     tray.setContextMenu(menu);
+};
+
+app.on('ready', () => {
+    if(app.dock) {
+        app.dock.hide();
+    }
+
+    tray = new Tray(path.join(__dirname, 'images', getIcon()));
+
+    tray.setToolTip('Clipmaster');
+    updateMenu();
 });
