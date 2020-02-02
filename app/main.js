@@ -47,7 +47,9 @@ const updateMenu = () => {
             accelerator: 'Shift+CommandOrControl+C',
             click() {
                 const clipping = addClipping();
-                showClippingNotification(clipping);
+                if(clipping) {
+                    showClippingNotification(clipping);
+                }
             }
         },
         {
@@ -95,7 +97,9 @@ app.on('ready', () => {
         'Shift+Option+CommandOrControl+C',
         () => {
             const clipping = addClipping();
-            showClippingNotification(clipping);
+            if(clipping) {
+                showClippingNotification(clipping);
+            }
         }
     );
 
