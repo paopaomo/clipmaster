@@ -57,10 +57,6 @@ const updateMenu = () => {
         }
     ]);
 
-    if(process.platform === 'win32') {
-        tray.on('click', tray.popUpContextMenu);
-    }
-
     tray.setContextMenu(menu);
 };
 
@@ -70,6 +66,10 @@ app.on('ready', () => {
     }
 
     tray = new Tray(path.join(__dirname, 'images', getIcon()));
+
+    if(process.platform === 'win32') {
+        tray.on('click', tray.popUpContextMenu);
+    }
 
     tray.setToolTip('Clipmaster');
     updateMenu();
