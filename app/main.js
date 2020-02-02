@@ -1,4 +1,4 @@
-const { app, Menu, Tray } = require('electron');
+const { app, Menu, Tray, nativeTheme } = require('electron');
 const path = require('path');
 
 let tray = null;
@@ -6,6 +6,9 @@ let tray = null;
 const getIcon = () => {
     if(process.platform === 'win32') {
         return 'icon-light@2x.ico';
+    }
+    if(nativeTheme.shouldUseDarkColors) {
+        return 'icon-light.png';
     }
     return 'icon-dark.png';
 };
