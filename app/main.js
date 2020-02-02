@@ -1,4 +1,4 @@
-const { app, Menu, Tray, nativeTheme, clipboard } = require('electron');
+const { app, Menu, Tray, nativeTheme, clipboard, globalShortcut } = require('electron');
 const path = require('path');
 
 let tray = null;
@@ -69,6 +69,24 @@ app.on('ready', () => {
 
     if(process.platform === 'win32') {
         tray.on('click', tray.popUpContextMenu);
+    }
+
+    const activationShortcut = globalShortcut.register(
+        'Option+CommandOrControl+C',
+        () => tray.popUpContextMenu()
+    );
+
+    if(!activationShortcut) {
+        console.error('Global activation shortcut failed to register');
+    }
+
+    const newClippingShortcut = globalShortcut.register(
+        'Shift+Option+CommandOrControl+C',
+        addClipping
+    );
+
+    if(!newClippingShortcut) {
+        console.error('Global new clipping shortcut failed to register');
     }
 
     tray.setToolTip('Clipmaster');
